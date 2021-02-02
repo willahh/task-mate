@@ -27,7 +27,7 @@ const UpdateTask = () => {
   ) : error ? (
     <p>An error occured.</p>
   ) : task ? (
-    <UpdateTaskForm initialValues={{ title: task.title }} />
+    <UpdateTaskForm id={id} initialValues={{ title: task.title }} />
   ) : (
     <p>Task not found</p>
   );

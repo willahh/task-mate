@@ -2,6 +2,8 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
+export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
+export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -11,42 +13,8 @@ export type Scalars = {
   Float: number;
 };
 
-export enum TaskStatus {
-  Active = 'active',
-  Completed = 'completed'
-}
-
-export type Task = {
-  __typename?: 'Task';
-  id: Scalars['Int'];
-  title: Scalars['String'];
-  status: TaskStatus;
-};
-
 export type CreateTaskInput = {
   title: Scalars['String'];
-};
-
-export type UpdateTaskInput = {
-  id: Scalars['Int'];
-  title?: Maybe<Scalars['String']>;
-  status?: Maybe<TaskStatus>;
-};
-
-export type Query = {
-  __typename?: 'Query';
-  tasks: Array<Task>;
-  task?: Maybe<Task>;
-};
-
-
-export type QueryTasksArgs = {
-  status?: Maybe<TaskStatus>;
-};
-
-
-export type QueryTaskArgs = {
-  id: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -69,6 +37,40 @@ export type MutationUpdateTaskArgs = {
 
 export type MutationDeleteTaskArgs = {
   id: Scalars['Int'];
+};
+
+export type Query = {
+  __typename?: 'Query';
+  tasks: Array<Task>;
+  task?: Maybe<Task>;
+};
+
+
+export type QueryTasksArgs = {
+  status?: Maybe<TaskStatus>;
+};
+
+
+export type QueryTaskArgs = {
+  id: Scalars['Int'];
+};
+
+export type Task = {
+  __typename?: 'Task';
+  id: Scalars['Int'];
+  title: Scalars['String'];
+  status: TaskStatus;
+};
+
+export enum TaskStatus {
+  Active = 'active',
+  Completed = 'completed'
+}
+
+export type UpdateTaskInput = {
+  id: Scalars['Int'];
+  title?: Maybe<Scalars['String']>;
+  status?: Maybe<TaskStatus>;
 };
 
 export type CreateTaskMutationVariables = Exact<{
@@ -103,6 +105,19 @@ export type TasksQueryVariables = Exact<{ [key: string]: never; }>;
 export type TasksQuery = (
   { __typename?: 'Query' }
   & { tasks: Array<(
+    { __typename?: 'Task' }
+    & Pick<Task, 'id' | 'title' | 'status'>
+  )> }
+);
+
+export type UpdateTaskMutationVariables = Exact<{
+  input: UpdateTaskInput;
+}>;
+
+
+export type UpdateTaskMutation = (
+  { __typename?: 'Mutation' }
+  & { updateTask?: Maybe<(
     { __typename?: 'Task' }
     & Pick<Task, 'id' | 'title' | 'status'>
   )> }
@@ -169,7 +184,7 @@ export const TaskDocument = gql`
  *   },
  * });
  */
-export function useTaskQuery(baseOptions?: Apollo.QueryHookOptions<TaskQuery, TaskQueryVariables>) {
+export function useTaskQuery(baseOptions: Apollo.QueryHookOptions<TaskQuery, TaskQueryVariables>) {
         return Apollo.useQuery<TaskQuery, TaskQueryVariables>(TaskDocument, baseOptions);
       }
 export function useTaskLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TaskQuery, TaskQueryVariables>) {
@@ -212,3 +227,37 @@ export function useTasksLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<Task
 export type TasksQueryHookResult = ReturnType<typeof useTasksQuery>;
 export type TasksLazyQueryHookResult = ReturnType<typeof useTasksLazyQuery>;
 export type TasksQueryResult = Apollo.QueryResult<TasksQuery, TasksQueryVariables>;
+export const UpdateTaskDocument = gql`
+    mutation updateTask($input: UpdateTaskInput!) {
+  updateTask(input: $input) {
+    id
+    title
+    status
+  }
+}
+    `;
+export type UpdateTaskMutationFn = Apollo.MutationFunction<UpdateTaskMutation, UpdateTaskMutationVariables>;
+
+/**
+ * __useUpdateTaskMutation__
+ *
+ * To run a mutation, you first call `useUpdateTaskMutation` within a React component and pass it any options that fit your needs.
+ * When your component renders, `useUpdateTaskMutation` returns a tuple that includes:
+ * - A mutate function that you can call at any time to execute the mutation
+ * - An object with fields that represent the current status of the mutation's execution
+ *
+ * @param baseOptions options that will be passed into the mutation, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options-2;
+ *
+ * @example
+ * const [updateTaskMutation, { data, loading, error }] = useUpdateTaskMutation({
+ *   variables: {
+ *      input: // value for 'input'
+ *   },
+ * });
+ */
+export function useUpdateTaskMutation(baseOptions?: Apollo.MutationHookOptions<UpdateTaskMutation, UpdateTaskMutationVariables>) {
+        return Apollo.useMutation<UpdateTaskMutation, UpdateTaskMutationVariables>(UpdateTaskDocument, baseOptions);
+      }
+export type UpdateTaskMutationHookResult = ReturnType<typeof useUpdateTaskMutation>;
+export type UpdateTaskMutationResult = Apollo.MutationResult<UpdateTaskMutation>;
+export type UpdateTaskMutationOptions = Apollo.BaseMutationOptions<UpdateTaskMutation, UpdateTaskMutationVariables>;
