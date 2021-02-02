@@ -2,8 +2,6 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -13,8 +11,42 @@ export type Scalars = {
   Float: number;
 };
 
+export enum TaskStatus {
+  Active = 'active',
+  Completed = 'completed'
+}
+
+export type Task = {
+  __typename?: 'Task';
+  id: Scalars['Int'];
+  title: Scalars['String'];
+  status: TaskStatus;
+};
+
 export type CreateTaskInput = {
   title: Scalars['String'];
+};
+
+export type UpdateTaskInput = {
+  id: Scalars['Int'];
+  title?: Maybe<Scalars['String']>;
+  status?: Maybe<TaskStatus>;
+};
+
+export type Query = {
+  __typename?: 'Query';
+  tasks: Array<Task>;
+  task?: Maybe<Task>;
+};
+
+
+export type QueryTasksArgs = {
+  status?: Maybe<TaskStatus>;
+};
+
+
+export type QueryTaskArgs = {
+  id: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -39,40 +71,6 @@ export type MutationDeleteTaskArgs = {
   id: Scalars['Int'];
 };
 
-export type Query = {
-  __typename?: 'Query';
-  tasks: Array<Task>;
-  task?: Maybe<Task>;
-};
-
-
-export type QueryTasksArgs = {
-  status?: Maybe<TaskStatus>;
-};
-
-
-export type QueryTaskArgs = {
-  id: Scalars['Int'];
-};
-
-export type Task = {
-  __typename?: 'Task';
-  id: Scalars['Int'];
-  title: Scalars['String'];
-  status: TaskStatus;
-};
-
-export enum TaskStatus {
-  Active = 'active',
-  Completed = 'completed'
-}
-
-export type UpdateTaskInput = {
-  id: Scalars['Int'];
-  title?: Maybe<Scalars['String']>;
-  status?: Maybe<TaskStatus>;
-};
-
 export type CreateTaskMutationVariables = Exact<{
   input: CreateTaskInput;
 }>;
@@ -81,6 +79,19 @@ export type CreateTaskMutationVariables = Exact<{
 export type CreateTaskMutation = (
   { __typename?: 'Mutation' }
   & { createTask?: Maybe<(
+    { __typename?: 'Task' }
+    & Pick<Task, 'id' | 'title' | 'status'>
+  )> }
+);
+
+export type TaskQueryVariables = Exact<{
+  id: Scalars['Int'];
+}>;
+
+
+export type TaskQuery = (
+  { __typename?: 'Query' }
+  & { task?: Maybe<(
     { __typename?: 'Task' }
     & Pick<Task, 'id' | 'title' | 'status'>
   )> }
@@ -132,6 +143,41 @@ export function useCreateTaskMutation(baseOptions?: Apollo.MutationHookOptions<C
 export type CreateTaskMutationHookResult = ReturnType<typeof useCreateTaskMutation>;
 export type CreateTaskMutationResult = Apollo.MutationResult<CreateTaskMutation>;
 export type CreateTaskMutationOptions = Apollo.BaseMutationOptions<CreateTaskMutation, CreateTaskMutationVariables>;
+export const TaskDocument = gql`
+    query Task($id: Int!) {
+  task(id: $id) {
+    id
+    title
+    status
+  }
+}
+    `;
+
+/**
+ * __useTaskQuery__
+ *
+ * To run a query within a React component, call `useTaskQuery` and pass it any options that fit your needs.
+ * When your component renders, `useTaskQuery` returns an object from Apollo Client that contains loading, error, and data properties
+ * you can use to render your UI.
+ *
+ * @param baseOptions options that will be passed into the query, supported options are listed on: https://www.apollographql.com/docs/react/api/react-hooks/#options;
+ *
+ * @example
+ * const { data, loading, error } = useTaskQuery({
+ *   variables: {
+ *      id: // value for 'id'
+ *   },
+ * });
+ */
+export function useTaskQuery(baseOptions?: Apollo.QueryHookOptions<TaskQuery, TaskQueryVariables>) {
+        return Apollo.useQuery<TaskQuery, TaskQueryVariables>(TaskDocument, baseOptions);
+      }
+export function useTaskLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TaskQuery, TaskQueryVariables>) {
+          return Apollo.useLazyQuery<TaskQuery, TaskQueryVariables>(TaskDocument, baseOptions);
+        }
+export type TaskQueryHookResult = ReturnType<typeof useTaskQuery>;
+export type TaskLazyQueryHookResult = ReturnType<typeof useTaskLazyQuery>;
+export type TaskQueryResult = Apollo.QueryResult<TaskQuery, TaskQueryVariables>;
 export const TasksDocument = gql`
     query Tasks {
   tasks {
