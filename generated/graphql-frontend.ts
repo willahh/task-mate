@@ -2,8 +2,6 @@ import { gql } from '@apollo/client';
 import * as Apollo from '@apollo/client';
 export type Maybe<T> = T | null;
 export type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] };
-export type MakeOptional<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]?: Maybe<T[SubKey]> };
-export type MakeMaybe<T, K extends keyof T> = Omit<T, K> & { [SubKey in K]: Maybe<T[SubKey]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
   ID: string;
@@ -13,8 +11,42 @@ export type Scalars = {
   Float: number;
 };
 
+export enum TaskStatus {
+  Active = 'active',
+  Completed = 'completed'
+}
+
+export type Task = {
+  __typename?: 'Task';
+  id: Scalars['Int'];
+  title: Scalars['String'];
+  status: TaskStatus;
+};
+
 export type CreateTaskInput = {
   title: Scalars['String'];
+};
+
+export type UpdateTaskInput = {
+  id: Scalars['Int'];
+  title?: Maybe<Scalars['String']>;
+  status?: Maybe<TaskStatus>;
+};
+
+export type Query = {
+  __typename?: 'Query';
+  tasks: Array<Task>;
+  task?: Maybe<Task>;
+};
+
+
+export type QueryTasksArgs = {
+  status?: Maybe<TaskStatus>;
+};
+
+
+export type QueryTaskArgs = {
+  id: Scalars['Int'];
 };
 
 export type Mutation = {
@@ -37,40 +69,6 @@ export type MutationUpdateTaskArgs = {
 
 export type MutationDeleteTaskArgs = {
   id: Scalars['Int'];
-};
-
-export type Query = {
-  __typename?: 'Query';
-  tasks: Array<Task>;
-  task?: Maybe<Task>;
-};
-
-
-export type QueryTasksArgs = {
-  status?: Maybe<TaskStatus>;
-};
-
-
-export type QueryTaskArgs = {
-  id: Scalars['Int'];
-};
-
-export type Task = {
-  __typename?: 'Task';
-  id: Scalars['Int'];
-  title: Scalars['String'];
-  status: TaskStatus;
-};
-
-export enum TaskStatus {
-  Active = 'active',
-  Completed = 'completed'
-}
-
-export type UpdateTaskInput = {
-  id: Scalars['Int'];
-  title?: Maybe<Scalars['String']>;
-  status?: Maybe<TaskStatus>;
 };
 
 export type CreateTaskMutationVariables = Exact<{
@@ -112,7 +110,9 @@ export type TaskQuery = (
   )> }
 );
 
-export type TasksQueryVariables = Exact<{ [key: string]: never; }>;
+export type TasksQueryVariables = Exact<{
+  status?: Maybe<TaskStatus>;
+}>;
 
 
 export type TasksQuery = (
@@ -231,7 +231,7 @@ export const TaskDocument = gql`
  *   },
  * });
  */
-export function useTaskQuery(baseOptions: Apollo.QueryHookOptions<TaskQuery, TaskQueryVariables>) {
+export function useTaskQuery(baseOptions?: Apollo.QueryHookOptions<TaskQuery, TaskQueryVariables>) {
         return Apollo.useQuery<TaskQuery, TaskQueryVariables>(TaskDocument, baseOptions);
       }
 export function useTaskLazyQuery(baseOptions?: Apollo.LazyQueryHookOptions<TaskQuery, TaskQueryVariables>) {
@@ -241,8 +241,8 @@ export type TaskQueryHookResult = ReturnType<typeof useTaskQuery>;
 export type TaskLazyQueryHookResult = ReturnType<typeof useTaskLazyQuery>;
 export type TaskQueryResult = Apollo.QueryResult<TaskQuery, TaskQueryVariables>;
 export const TasksDocument = gql`
-    query Tasks {
-  tasks {
+    query Tasks($status: TaskStatus) {
+  tasks(status: $status) {
     id
     title
     status
@@ -262,6 +262,7 @@ export const TasksDocument = gql`
  * @example
  * const { data, loading, error } = useTasksQuery({
  *   variables: {
+ *      status: // value for 'status'
  *   },
  * });
  */
@@ -275,7 +276,7 @@ export type TasksQueryHookResult = ReturnType<typeof useTasksQuery>;
 export type TasksLazyQueryHookResult = ReturnType<typeof useTasksLazyQuery>;
 export type TasksQueryResult = Apollo.QueryResult<TasksQuery, TasksQueryVariables>;
 export const UpdateTaskDocument = gql`
-    mutation updateTask($input: UpdateTaskInput!) {
+    mutation UpdateTask($input: UpdateTaskInput!) {
   updateTask(input: $input) {
     id
     title
